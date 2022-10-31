@@ -9,24 +9,26 @@
         Account settings
       </h2>
 
-      <form>
+      <form @submit.prevent="handleSubmit">
         <div class="grid grid-cols-1 gap-6 mt-4">
           <div>
-            <label
-              class="text-gray-700 dark:text-gray-200"
-              for="title"
+            <label class="text-gray-700 dark:text-gray-200" for="title"
               >Title</label
             >
             <input
               type="text"
               placeholder="Title Picture"
               class="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring"
+              v-model="title"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium dark:text-gray-200"> Image </label>
+            <label class="block text-sm font-medium dark:text-gray-200">
+              Image
+            </label>
             <div
               class="mt-1 flex justify-center items-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer"
+              @click="handleFileUpload"
             >
               <div class="space-y-1 text-center">
                 <svg
@@ -54,10 +56,15 @@
                       name="file-upload"
                       type="file"
                       class="sr-only"
+                      ref="inputImage"
+                      @change="handleChangeFileUpload"
+                      accept="image/*"
                     />
                   </label>
                 </div>
-                <p class="text-xs dark:text-gray-200">PNG, JPG, GIF up to 10MB</p>
+                <p class="text-xs dark:text-gray-200">
+                  PNG, JPG, GIF up to 10MB
+                </p>
               </div>
             </div>
           </div>
@@ -74,4 +81,36 @@
     </section>
   </div>
 </template>
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import { ref } from "vue";
+
+const title = ref("");
+const image = ref<HTMLCollection | null>(null);
+const inputImage = ref<HTMLInputElement | null>(null);
+
+const handleFileUpload = () => {
+  inputImage.value?.click();
+};
+
+const handleChangeFileUpload = (e: Event) => {
+  image.value = (e.target as HTMLInputElement).files[0];
+};
+
+const handleSubmit = async () => {
+  const formData = new FormData();
+  formData.append("title", title.value);
+  formData.append("image", image.value as Blob);
+
+  const response = await fetch("http://localhost:3000/api/catalog", {
+    method: "POST",
+    body: formData,
+  }); /*  */
+
+  const data = await response.json();
+  if(data.status) {
+    title.value = "";
+    image.value = null;
+    inputImage.value = null;
+  }
+};
+</script>

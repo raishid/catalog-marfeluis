@@ -12,6 +12,13 @@ const ImageSchema = new Schema({
     required: true,
     trim: true,
   },
+  originalName: {
+    type: String,
+    required: true,
+  },
+  mimeType:{
+    type: String,
+  },
   create_at: {
     type: Date,
     default: Date.now,
